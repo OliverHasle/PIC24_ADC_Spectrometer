@@ -90,6 +90,43 @@ void UART1_Initialize()
     U1STAbits.UTXEN = 1;
 }
 
+//void UART2_Initialize()
+//{
+/**    
+     Set the UART2 module to the options selected in the user interface.
+     Make sure to set LAT bit corresponding to TxPin as high before UART initialization
+*/
+//    RPINR19bits.U2RXR = 0x001E;    //RF2->UART2:U2RX             TBD: make sure 0x001E is the value to be set here
+//    RPOR8bits.RP16R   = 0x0003;      //RF3->UART2:U2TX           TBD: make sure this setting is correct
+//    // NOTE: the UART->USB converter sits at pins RF2/RF3. Other pins are available for UART communication through the headers. 
+    
+//    U2MODEbits.UARTEN     = 1;     // Disable UART                  TBD: make sure 0x001E is the value to be set here
+// // U2MODEbits.UFRZ       = 0;     // don't freeze in Debug mode
+//    U2MODEbits.USIDL      = 0;     // Continue in Idle mode 
+//    U2MODEbits.IREN       = 0;     // Disable IrDA
+//    U2MODEbits.RTSMD      = 0;     // U1RTS in Flow Control mode
+// // U2MODEbits.ALTIO      = 0;     // U1 uses U1TX and U1RX pins, not alternative
+//    U2MODEbits.UEN        = 0b00;  // ?? 
+//    U2MODEbits.WAKE       = 0;     // Disable wake up on sleep
+//    U2MODEbits.LPBACK     = 0;     // Loopback mode disabled
+//    U2MODEbits.ABAUD      = 0;     // Disable automatic baud rate measurement
+//    U2MODEbits.RXINV      = 0;     // RX idle state is "1"
+//    U2MODEbits.BRGH       = 1;     // High baud rate
+//    U2MODEbits.PDSEL      = 0b00;  // 8 bit data, no parity
+//    U2MODEbits.STSEL      = 0;     // 1 stop bit
+            
+    // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
+//    U2STA = 0x00;
+    
+    // Acc tbl. 21-2 UART manual, for FCY = 16 MHz and 115200 use 
+    // NOTE: use table for BRGH = 1!! ( High baud rate)
+//    U2BRG = 34; 
+    
+    
+//    U2MODEbits.UARTEN = 1;   // enabling UART ON bit
+//    U2STAbits.UTXEN = 1;
+//}
+
 uint8_t UART1_Read(void)
 {
     while(!(U1STAbits.URXDA == 1))

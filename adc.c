@@ -6,7 +6,7 @@
 #include "globals.h"
 #include "adc.h"
 
-extern volatile int data_buf[VIDEO_SIGNAL_LENGTH];
+extern volatile int data_buf[VIDEO_SIGNAL_LENGTH]; //Why is that here?
 extern volatile int16_t loopCounter;
 extern volatile int conversions; 
 

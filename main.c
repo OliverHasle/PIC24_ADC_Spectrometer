@@ -65,6 +65,8 @@
 
 /* Standard includes. */
 #include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 #include <p24FJ128GL306.h>
 
 #include "uart1.h"
@@ -86,13 +88,16 @@
 
 
 volatile int data_buf[VIDEO_SIGNAL_LENGTH]; 
-volatile bool spectrum_done = false; 
+volatile bool spectrum_done  = false; 
 volatile int16_t loopCounter = 0;
-volatile int conversions = 0; // to count how many ADC conversions actually were triggered
+volatile int conversions     = 0; // to count how many ADC conversions actually were triggered
 
+static const bool use_kiss = true;
 
-
-
+static const uint8_t frameStartEnd      = KISS_FEND;
+static const uint8_t frameStartEsc      = KISS_FESC;
+static const uint8_t transposedFrameEnd = KISS_TFEND;
+static const uint8_t transposedFrameEsc = KISS_TFESC;
 
 static void setup( void )
 {
@@ -108,18 +113,61 @@ static void setup( void )
     enablePWM();
 }
 
+bool uart2sentiSendCommand()
+{
+    /* KISS protocol, used to send data to SentiBoard */
+    int ret = 0;    
+    ret = printf("%x", frameStartEnd); /* Send 0xC0*/
+    
+    if(ret < 0)
+    {
+        return ret;
+    }
+    int userBytesWritten = 0;
+    int dataLen = VIDEO_SIGNAL_LENGTH; //sizeof(data_buf);
+    
+    for (int i = 0; i < dataLen; i++)
+    {
+        if(data_buf[i] == KISS_FEND)
+        {
+            printf("%x", frameStartEsc);
+            printf("%x", transposedFrameEnd);
+            userBytesWritten++;
+        }
+        else if (data_buf[i] == KISS_FESC)
+        {
+            printf("%x", frameStartEsc);
+            printf("%x", transposedFrameEsc);
+            userBytesWritten++;
+        }
+        else
+        {
+            printf("%x", data_buf[i]);
+            userBytesWritten += sizeof(data_buf[i]);
+        }
+    }
+    printf("%x", frameStartEnd); /* Send 0xC0*/
+    return userBytesWritten;
+}
 
 static void loop_UART( void )
 {
     while (1) {
         
         if (spectrum_done) {
-            for (int i = 0; i < VIDEO_SIGNAL_LENGTH; i++) {
-                printf("%d,", data_buf[i]); 
+            if (use_kiss)
+            {
+                uart2sentiSendCommand();
             }
-            printf("\n");             
+            else
+            {
+                for (int i = 0; i < VIDEO_SIGNAL_LENGTH; i++) {
+                    printf("%d,", data_buf[i]); 
+                }
+                printf("\n");             
+            }
             spectrum_done = false; 
-            //IEC1bits.T5IE = 1; 
+            //IEC1bits.T5IE = 1;
         }
     }
 }

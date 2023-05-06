@@ -123,10 +123,10 @@ void setupPWM (void)
     CCP1STATL             = 0;       // Clear all status bits
     
     CCP1TMRL              = 0;       // Initialize timer
-    CCP1PRL               = 200;       // Timer period
+    CCP1PRL               = 200;       // Timer period 66
             
     CCP1RA                = 0;       // Edge aligned
-    CCP1RB                = 100;       // falling edge after 40/2 cycles
+    CCP1RB                = 100;       // falling edge after 200/2 cycles 33
     
     //IEC3bits.CCP1IE       = 1;       // CCP Interrupt fired on FALLING edge
     IEC0bits.CCT1IE       = 1;       // CCT Interrupt fired on RISING edge
