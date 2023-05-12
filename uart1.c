@@ -58,11 +58,11 @@ void UART1_Initialize()
      Set the UART1 module to the options selected in the user interface.
      Make sure to set LAT bit corresponding to TxPin as high before UART initialization
 */
-    
+
     RPINR18bits.U1RXR = 0x001E;    //RF2->UART1:U1RX
     RPOR8bits.RP16R = 0x0003;      //RF3->UART1:U1TX
     // NOTE: the UART->USB converter sits at pins RF2/RF3. Other pins are available for UART communication through the headers. 
-    
+
     U1MODEbits.UARTEN     = 1;     // Disable UART
  // U1MODEbits.UFRZ       = 0;     // don't freeze in Debug mode
     U1MODEbits.USIDL      = 0;     // Continue in Idle mode 
@@ -74,18 +74,19 @@ void UART1_Initialize()
     U1MODEbits.LPBACK     = 0;     // Loopback mode disabled
     U1MODEbits.ABAUD      = 0;     // Disable automatic baud rate measurement
     U1MODEbits.RXINV      = 0;     // RX idle state is "1"
-    U1MODEbits.BRGH       = 1;     // High baud rate
+    U1MODEbits.BRGH       = 1;     // High baud rate 114285
+//    U1MODEbits.BRGH       = 0;     // Low baud rate 9600
     U1MODEbits.PDSEL      = 0b00;  // 8 bit data, no parity
     U1MODEbits.STSEL      = 0;     // 1 stop bit
-            
+
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U1STA = 0x00;
-    
+
     // Acc tbl. 21-2 UART manual, for FCY = 16 MHz and 115200 use 
     // NOTE: use table for BRGH = 1!! ( High baud rate)
-    U1BRG = 34; 
-    
-    
+    U1BRG = 34; // baudrate 114285
+//    U1BRG = 103;   // baudrate 9600
+
     U1MODEbits.UARTEN = 1;   // enabling UART ON bit
     U1STAbits.UTXEN = 1;
 }

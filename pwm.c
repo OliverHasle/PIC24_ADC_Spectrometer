@@ -123,54 +123,30 @@ void setupPWM (void)
     CCP1STATL             = 0;       // Clear all status bits
     
     CCP1TMRL              = 0;       // Initialize timer
-    CCP1PRL               = 200;       // Timer period 66
+    CCP1PRL               = 66;       // Timer period 66 /100 /200
             
     CCP1RA                = 0;       // Edge aligned
-    CCP1RB                = 100;       // falling edge after 200/2 cycles 33
+    CCP1RB                = 33;       // falling edge after 200/2 cycles 33 /50 /100
     
-    //IEC3bits.CCP1IE       = 1;       // CCP Interrupt fired on FALLING edge
+    IEC3bits.CCP1IE       = 1;       // CCP Interrupt fired on FALLING edge
     IEC0bits.CCT1IE       = 1;       // CCT Interrupt fired on RISING edge
-    //IFS3bits.CCP1IF       = 0;       // Reset interrupt state
+    IFS3bits.CCP1IF       = 0;       // Reset interrupt state
     IFS0bits.CCT1IF       = 0; 
     IPC0bits.CCT1IP       = 5; 
-    //IPC15bits.CCP1IP      = 5; 
+    IPC15bits.CCP1IP      = 5; 
  }
-/*
+
 void __attribute__((interrupt, shadow,no_auto_psv)) _CCP1Interrupt(void) {  // FALLING edge
     // During the falling edge, we do all setup 
     IFS3bits.CCP1IF = false; // Reset interrupt state
+    AD1CON1bits.SAMP = 0;
 
-    // end sampling process before clock toggle, ie. immediately. This gives us the analog value for the PREVIOUS iteration: 
-    if (spectrum_done) {
-        //LATDbits.LATD8 = 1; 
-        return; // this means that UART isn't done writing the data and we don't need to do anything here
-    }
-    if (loopCounter == 0) {    
-        LATDbits.LATD1 = 1; // START PULSE HIGH 
-        LATDbits.LATD8 = 1; 
-    } else if (loopCounter == START_PULSE_LEN_CYC) {
-        LATDbits.LATD1 = 0; 
-    } else if (loopCounter >= START_PULSE_LEN_CYC + VIDEO_ENABLE_OFFSET && 
-               loopCounter <  START_PULSE_LEN_CYC + VIDEO_ENABLE_OFFSET + VIDEO_SIGNAL_LENGTH - 1) {
-        
-        //while (!AD1CON1bits.DONE) {} ; // wait for data to become ready
-        data_buf[loopCounter - (START_PULSE_LEN_CYC + VIDEO_ENABLE_OFFSET) ] = ADC1BUF0; 
-
-        //LATDbits.LATD8 = 1; 
-    } else if (loopCounter >= START_PULSE_LEN_CYC + VIDEO_ENABLE_OFFSET + VIDEO_SIGNAL_LENGTH - 1){
-        LATDbits.LATD8 = 0; 
-        spectrum_done = true; 
-        loopCounter = -1;
-    }
-    loopCounter++;
+    
 }
- * */
-
 void __attribute__((interrupt,shadow,no_auto_psv)) _CCT1Interrupt(void) {  // RISING edge
     // during the rising edge we only trigger the ADC
     //prinft("Interrupt CCT1 fired"); 
     //LATDbits.LATD8 = 0; 
-    AD1CON1bits.SAMP = 0;
     IFS0bits.CCT1IF  = false; 
     int oldData = ADC1BUF0; 
 

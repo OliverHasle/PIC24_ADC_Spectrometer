@@ -86,8 +86,7 @@
  * 
  */
 
-
-volatile int data_buf[VIDEO_SIGNAL_LENGTH]; 
+volatile int16_t data_buf[VIDEO_SIGNAL_LENGTH];
 volatile bool spectrum_done  = false; 
 volatile int16_t loopCounter = 0;
 volatile int conversions     = 0; // to count how many ADC conversions actually were triggered
@@ -104,49 +103,46 @@ static void setup( void )
        
     UART1_Initialize();         // UART initializes on pin RF2/RF3 for UART->USB conversion
     
-    printf("Starting ADC on RB6\n"); 
+    //printf("Starting ADC on RB6\n"); 
     setupADC_Oneshot();         // Analog in is at RB6
-    printf("Starting PWM on RB5. START signal on pin RD1.\n"); 
+    //printf("Starting PWM on RB5. START signal on pin RD1.\n"); 
     setupPWM();                    // PWM RUNS ON PIN RB5, START on RD1
     
-    printf("Timer and PWM initialized, ACD on\n");
+    //printf("Timer and PWM initialized, ACD on\n");
     enablePWM();
 }
 
-bool uart2sentiSendCommand()
+int uart2sentiSendCommand( void )
 {
     /* KISS protocol, used to send data to SentiBoard */
-    int ret = 0;    
-    ret = printf("%x", frameStartEnd); /* Send 0xC0*/
-    
-    if(ret < 0)
-    {
+    int ret = 0;
+    ret     = printf("%c", frameStartEnd); /* Send 0xC0*/
+
+    if(ret < 0) {
         return ret;
     }
     int userBytesWritten = 0;
-    int dataLen = VIDEO_SIGNAL_LENGTH; //sizeof(data_buf);
+    int dataLen          = sizeof(data_buf); //VIDEO_SIGNAL_LENGTH;
+
+    uint8_t* data_bytes = (uint8_t*)data_buf;
     
-    for (int i = 0; i < dataLen; i++)
-    {
-        if(data_buf[i] == KISS_FEND)
-        {
-            printf("%x", frameStartEsc);
-            printf("%x", transposedFrameEnd);
+    for (int i = 0; i < dataLen; i++) {
+        if(data_bytes[i] == KISS_FEND) {
+            printf("%c", frameStartEsc);
+            printf("%c", transposedFrameEnd);
             userBytesWritten++;
         }
-        else if (data_buf[i] == KISS_FESC)
-        {
-            printf("%x", frameStartEsc);
-            printf("%x", transposedFrameEsc);
+        else if (data_bytes[i] == KISS_FESC) {
+            printf("%c", frameStartEsc);
+            printf("%c", transposedFrameEsc);
             userBytesWritten++;
         }
-        else
-        {
-            printf("%x", data_buf[i]);
-            userBytesWritten += sizeof(data_buf[i]);
+        else {
+            printf("%c", data_bytes[i]);
+            userBytesWritten += sizeof(data_bytes[i]);
         }
     }
-    printf("%x", frameStartEnd); /* Send 0xC0*/
+    printf("%c", frameStartEnd); /* Send 0xC0*/
     return userBytesWritten;
 }
 
@@ -155,14 +151,12 @@ static void loop_UART( void )
     while (1) {
         
         if (spectrum_done) {
-            if (use_kiss)
-            {
+            if (use_kiss) {
                 uart2sentiSendCommand();
             }
-            else
-            {
+            else {
                 for (int i = 0; i < VIDEO_SIGNAL_LENGTH; i++) {
-                    printf("%d,", data_buf[i]); 
+                    printf("%d,", data_buf[i]);
                 }
                 printf("\n");             
             }
